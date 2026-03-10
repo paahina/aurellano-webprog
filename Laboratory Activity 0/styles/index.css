@@ -1,0 +1,106 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  display: flex;
+  padding: 1em;
+  justify-content: center;
+  font-family: "Arial", sans-serif;
+  background-color: #e8f0ee;
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border-radius: 1em;
+  padding: 1.5em;
+  width: 80ch;
+  max-height: 89vh;
+  box-shadow: 0 0 1em rgba(0, 0, 0, 0.15);
+  gap: 1em;
+}
+
+.input-section {
+  display: flex;
+  gap: 0.5em;
+}
+
+.student-input {
+  flex: 1;
+  padding: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 0.5em;
+  padding: 0.5em 0.8em;
+}
+.button {
+  border: none;
+  border-radius: 0.5em;
+  cursor: pointer;
+  color: white;
+  padding: 0.6em 0.8em;
+}
+.add.button {
+  background-color: #0b7a5b;
+  color: white;
+}
+.student-input,
+.button {
+  font-size: 16px;
+}
+.student-lists {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  overflow: auto;
+}
+.student-lists.empty {
+  justify-content: start;
+  align-items: center;
+}
+/*Student Box Styles*/
+.student-box {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d9e1ec;
+  border-radius: 0.8em;
+  padding: 0.8em 1em;
+  gap: 0.5em;
+}
+/*Student status*/
+.student-box.mark-present {
+  background-color: #f1f8ff;
+}
+.student-box.mark-absent {
+  background-color: #fffbeb;
+}
+
+.student-status {
+  font-weight: bold;
+}
+.student-status.status-present {
+  color: #1968dc;
+}
+.student-status.status-absent {
+  color: #d77000;
+}
+/*Student status*/
+.student-box .student-name {
+  display: flex;
+  flex: 1;
+  gap: 0.5em;
+}
+.hidden {
+  display: none;
+}
+.button.present {
+  background-color: #1668dc;
+}
+.button.absent {
+  background-color: #f59e0b;
+}
+.button.remove {
+  background-color: #d92d20;
+}
