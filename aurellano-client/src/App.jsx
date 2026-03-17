@@ -1,28 +1,26 @@
-// import { useState } from "react";
-// import reactLogo from "./assets/react.svg";
-// import viteLogo from "/vite.svg";
-import "./App.css";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+import Layout from "./components/Layout";
+import HomePage from "./pages/HomePage";
+import ArticlePage from "./pages/ArticlePage";
+import AboutPage from "./pages/AboutPage";
+
+const routes = [
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      { path: "/", element: <HomePage /> },
+      { path: "/article", element: <ArticlePage /> },
+      { path: "/about", element: <AboutPage /> },
+    ],
+  },
+];
+
+const router = createBrowserRouter(routes);
 
 function App() {
-  //const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div className="App">
-        <header className="App-header">
-          <h1>Welcome to My React App!</h1>
-          <p>
-            Name: Aurellano, Page P. <br />
-            Email: p.aurellano3@gmail.com <br />
-            Other Personal Info:{" "}
-            <a href="https://github.com/paahina/aurellano-webprog.git">
-              GitHub Repository
-            </a>
-          </p>
-        </header>
-      </div>
-    </>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;
