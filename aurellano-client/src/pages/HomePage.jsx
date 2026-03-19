@@ -1,16 +1,21 @@
 import Button from "../components/Button";
 
+import homeImg from "../assets/imgs/home.jpg";
+import placeholder from "../assets/imgs/placeholder.jpg";
+import spacing from "../assets/imgs/spacing.jpg";
+import consistent from "../assets/imgs/consistent.jpg";
+
 const HomePage = () => {
   return (
     <div className="flex w-full flex-col gap-6">
-      <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section className=" bg-transparent px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
           <div>
             <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
               Hero Section
             </p>
 
-            <h1 className="max-w-xl text-3xl font-bold leading-tight text-zinc-900 sm:text-4xl">
+            <h1 className="max-w-xl text-3xl font-bold leading-tight text-[#0C3AA7] sm:text-4xl">
               Welcome to Wireframe Studio Layout
             </h1>
 
@@ -20,63 +25,65 @@ const HomePage = () => {
             </p>
 
             <div className="mt-6">
-              <Button to="/about" variant="primary">
+              <Button to="/about" variant="custom1">
                 Learn More
               </Button>
             </div>
           </div>
 
-          <div className="rounded-3xl border-2 border-dashed border-zinc-300 bg-zinc-100 p-6">
-            <div className="flex min-h-65 items-center justify-center rounded-[1.25rem] bg-zinc-200">
-              <div className="h-20 w-20 rounded-full border-2 border-zinc-300 bg-zinc-100" />
-            </div>
+          <div className="rounded-3xl overflow-hidden shadow-[0_4px_8px_rgba(0,0,0,0.85)] h-100">
+            <img
+              src={homeImg}
+              alt="BMW"
+              className="object-cover w-full h-full"
+            />
           </div>
         </div>
       </section>
 
-      <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section className="bg-[#0C3AA7] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="mb-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#97A6C9]">
             KPI Section
           </p>
 
-          <h2 className="mt-2 text-2xl font-semibold text-zinc-900">
+          <h2 className="mt-2 text-2xl font-semibold text-white">
             Quick overview blocks
           </h2>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-5">
-            <p className="text-2xl font-bold text-zinc-900">12</p>
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
+          <div className="rounded-3xl bg-[#97A6C9] p-5">
+            <p className="text-2xl font-bold text-white">12</p>
+            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#0C3AA7]">
               Projects
             </p>
           </div>
 
-          <div className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-5">
-            <p className="text-2xl font-bold text-zinc-900">08</p>
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
+          <div className="rounded-3xl bg-[#97A6C9] p-5">
+            <p className="text-2xl font-bold text-white">08</p>
+            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#0C3AA7]">
               Sections
             </p>
           </div>
 
-          <div className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-5">
-            <p className="text-2xl font-bold text-zinc-900">24</p>
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
+          <div className="rounded-3xl bg-[#97A6C9] p-5">
+            <p className="text-2xl font-bold text-white">24</p>
+            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#0C3AA7]">
               Screens
             </p>
           </div>
 
-          <div className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-5">
-            <p className="text-2xl font-bold text-zinc-900">04</p>
-            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-zinc-500">
+          <div className="rounded-3xl bg-[#97A6C9] p-5">
+            <p className="text-2xl font-bold text-white">04</p>
+            <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#0C3AA7]">
               Layouts
             </p>
           </div>
         </div>
       </section>
 
-      <section className="border-y-2 border-zinc-900 bg-zinc-50 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+      <section className="shadow-[0_0_10px_rgba(0,0,0,0.4)] bg-[#ebebeb] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="mb-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
             Feature Cards
@@ -88,56 +95,68 @@ const HomePage = () => {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <article className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
+          <article className="rounded-3xl border-2 border-[#0C3AA7] bg-[#97A6C9] p-4">
             <div className="flex aspect-4/3 items-center justify-center rounded-[1.25rem] bg-zinc-200">
-              <div className="h-12 w-12 border-2 border-zinc-300 bg-zinc-100" />
+              <img
+                src={placeholder}
+                alt="Feature One"
+                className="object-containe w-full h-full rounded-xl"
+              />
             </div>
 
-            <h3 className="mt-4 text-lg font-semibold text-zinc-900">
+            <h3 className="mt-4 text-lg font-bold text-white">
               Feature Card One
             </h3>
 
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
+            <p className="mt-3 text-sm leading-6 text-white">
               A clean placeholder for title, short text, and action.
             </p>
 
-            <Button className="mt-4" variant="primary">
+            <Button className="mt-4" variant="custom2">
               View More
             </Button>
           </article>
 
-          <article className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
+          <article className="rounded-3xl border-2 border-[#0C3AA7] bg-[#97A6C9] p-4">
             <div className="flex aspect-4/3 items-center justify-center rounded-[1.25rem] bg-zinc-200">
-              <div className="h-12 w-12 border-2 border-zinc-300 bg-zinc-100" />
+              <img
+                src={spacing}
+                alt="Feature Two"
+                className="object-containe w-full h-full rounded-xl"
+              />
             </div>
 
-            <h3 className="mt-4 text-lg font-semibold text-zinc-900">
+            <h3 className="mt-4 text-lg font-bold text-white">
               Feature Card Two
             </h3>
 
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
+            <p className="mt-3 text-sm leading-6 text-white">
               Balanced spacing keeps the card layout easy to scan.
             </p>
 
-            <Button className="mt-4" variant="primary">
+            <Button className="mt-4" variant="custom2">
               View More
             </Button>
           </article>
 
-          <article className="rounded-3xl border-2 border-zinc-900 bg-zinc-100 p-4">
+          <article className="rounded-3xl border-2 border-[#0C3AA7] bg-[#97A6C9] p-4">
             <div className="flex aspect-4/3 items-center justify-center rounded-[1.25rem] bg-zinc-200">
-              <div className="h-12 w-12 border-2 border-zinc-300 bg-zinc-100" />
+              <img
+                src={consistent}
+                alt="Feature Three"
+                className="object-containe w-full h-full rounded-xl"
+              />
             </div>
 
-            <h3 className="mt-4 text-lg font-semibold text-zinc-900">
+            <h3 className="mt-4 text-lg font-bold text-white">
               Feature Card Three
             </h3>
 
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
+            <p className="mt-3 text-sm leading-6 text-white">
               Repeated blocks give the page a consistent wireframe rhythm.
             </p>
 
-            <Button className="mt-4" variant="primary">
+            <Button className="mt-4" variant="custom2">
               View More
             </Button>
           </article>
