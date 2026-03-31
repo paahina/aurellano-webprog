@@ -11,7 +11,7 @@ const ArticleList = ({ articles }) => {
               <img
                 src={article.imageUrl}
                 alt={article.title}
-                className="object-contain w-full h-full"
+                className="object-cover w-full h-full"
               />
             ) : (
               <div className="h-12 w-12 border-2 border-zinc-300 bg-zinc-100" />
@@ -20,13 +20,15 @@ const ArticleList = ({ articles }) => {
           <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
             Article {String(index + 1).padStart(2, "0")}
           </p>
-          <h3 className="mt-3 text-sm leading-6 text-black">{article.title}</h3>
+          <h3 className="mt-3 text-sm leading-6 text-[#0C3AA7] font-semibold">
+            {article.title}
+          </h3>
 
-          <p className="mt-3 text-sm leading-6 text-zinc-600">
+          <p className="mt-3 text-sm leading-6 text-white">
             {article.content[0].substring(0, 150)}...
           </p>
           <Link to={`/articles/${article.name}`}>
-            <Button className="mt-4" variant="custom2">
+            <Button className="mt-4 align-self-end" variant="custom1">
               Read More
             </Button>
           </Link>

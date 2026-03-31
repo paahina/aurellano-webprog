@@ -39,7 +39,9 @@ const AboutPage = () => {
               <Button to="/" variant="custom1">
                 Back Home
               </Button>
-              <Button to="/article">Open Articles</Button>
+              <Button to="/article" variant="custom2">
+                Open Articles
+              </Button>
             </div>
           </div>
         </div>

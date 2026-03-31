@@ -25,7 +25,7 @@ const HomePage = () => {
             </p>
 
             <div className="mt-6">
-              <Button to="/about" variant="custom1">
+              <Button to="/about" variant="custom2">
                 Learn More
               </Button>
             </div>

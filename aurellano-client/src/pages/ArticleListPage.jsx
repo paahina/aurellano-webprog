@@ -1,10 +1,6 @@
 import Button from "../components/Button";
 import ArticleList from "../components/ArticleList";
 import articles from "../assets/article-content.js";
-// import card1 from "../assets/imgs/card (1).jpg";
-// import card2 from "../assets/imgs/card (2).jpg";
-// import card3 from "../assets/imgs/card (3).jpg";
-// import card4 from "../assets/imgs/card (4).jpg";
 
 const ArticleListPage = () => {
   return (
@@ -24,7 +20,9 @@ const ArticleListPage = () => {
         </p>
 
         <div className="mt-6">
-          <Button to="/">Back Home</Button>
+          <Button to="/" variant="custom2">
+            Back Home
+          </Button>
         </div>
       </section>
 
@@ -45,31 +43,3 @@ const ArticleListPage = () => {
 };
 
 export default ArticleListPage;
-/*
-<article className="rounded-3xl  bg-[#97A6C9] p-4">
-            <div className="flex aspect-4/4 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
-              <img
-                src={card1}
-                alt="About"
-                className="object-containe w-full h-full" 
-              />
-            </div>
-
-            <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
-              Article 01
-            </p>
-
-            <h3 className="mt-2 text-lg font-semibold text-[#0C3AA7]">
-              Wireframe layout basics
-            </h3>
-
-            <p className="mt-3 text-sm leading-6 text-black">
-              A simple placeholder for a featured article with image, title, and
-              short copy.
-            </p>
-
-            <Button className="mt-4" variant="custom2">
-              Read More
-            </Button>
-          </article>
-*/
