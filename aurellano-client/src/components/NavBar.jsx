@@ -1,11 +1,11 @@
 import { NavLink } from "react-router-dom";
 
-import logo from "../assets/imgs/my_logo.png";
+const logo = "/assets/imgs/my_logo.png";
 
 const links = [
   { label: "Home", to: "/" },
   { label: "About", to: "/about" },
-  { label: "Article", to: "/article" },
+  { label: "Article", to: "/articles" },
 ];
 
 const navLinkClassName = ({ isActive }) =>

@@ -2,17 +2,21 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 import Layout from "./components/Layout";
 import HomePage from "./pages/HomePage";
+import ArticleListPage from "./pages/ArticleListPage";
 import ArticlePage from "./pages/ArticlePage";
 import AboutPage from "./pages/AboutPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 const routes = [
   {
     path: "/",
     element: <Layout />,
+    errorElement: <NotFoundPage />,
     children: [
       { path: "/", element: <HomePage /> },
-      { path: "/article", element: <ArticlePage /> },
       { path: "/about", element: <AboutPage /> },
+      { path: "/articleS", element: <ArticleListPage /> },
+      { path: "/articles/:name", element: <ArticlePage /> },
     ],
   },
 ];

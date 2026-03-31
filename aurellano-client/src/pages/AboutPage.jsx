@@ -1,10 +1,10 @@
 import Button from "../components/Button";
 
-import aboutImg from "../assets/imgs/about.jpg";
-import grid1 from "../assets/imgs/grid (1).jpg";
-import grid2 from "../assets/imgs/grid (2).jpg";
-import grid3 from "../assets/imgs/grid (3).jpg";
-import grid4 from "../assets/imgs/grid (4).jpg";
+const aboutImg = "/assets/imgs/about.jpg";
+const grid1 = "/assets/imgs/grid (1).jpg";
+const grid2 = "/assets/imgs/grid (2).jpg";
+const grid3 = "/assets/imgs/grid (3).jpg";
+const grid4 = "/assets/imgs/grid (4).jpg";
 
 const AboutPage = () => {
   return (

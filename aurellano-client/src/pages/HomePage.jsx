@@ -1,9 +1,9 @@
 import Button from "../components/Button";
 
-import homeImg from "../assets/imgs/home.jpg";
-import placeholder from "../assets/imgs/placeholder.jpg";
-import spacing from "../assets/imgs/spacing.jpg";
-import consistent from "../assets/imgs/consistent.jpg";
+const homeImg = "/assets/imgs/home.jpg";
+const placeholder = "/assets/imgs/placeholder.jpg";
+const spacing = "/assets/imgs/spacing.jpg";
+const consistent = "/assets/imgs/consistent.jpg";
 
 const HomePage = () => {
   return (
