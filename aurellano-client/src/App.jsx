@@ -1,10 +1,17 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-import Layout from "./components/Layout";
-import HomePage from "./pages/HomePage";
-import ArticleListPage from "./pages/ArticleListPage";
-import ArticlePage from "./pages/ArticlePage";
-import AboutPage from "./pages/AboutPage";
+//Layouts
+import Layout from "./layouts/Layout";
+import AuthLayout from "./layouts/AuthLayout";
+//Landing Pages
+import HomePage from "./pages/LandingPages/HomePage";
+import ArticleListPage from "./pages/LandingPages/ArticleListPage";
+import ArticlePage from "./pages/LandingPages/ArticlePage";
+import AboutPage from "./pages/LandingPages/AboutPage";
+//Authentication Pages
+import SignInPage from "./pages/AuthPages/SignInPage";
+import SignUpPage from "./pages/AuthPages/SignUpPage";
+//Error Page
 import NotFoundPage from "./pages/NotFoundPage";
 
 const routes = [
@@ -17,6 +24,15 @@ const routes = [
       { path: "/about", element: <AboutPage /> },
       { path: "/articleS", element: <ArticleListPage /> },
       { path: "/articles/:name", element: <ArticlePage /> },
+    ],
+  },
+  {
+    path: "auth/",
+    element: <AuthLayout />,
+    errorElement: <NotFoundPage />,
+    children: [
+      { path: "signin", element: <SignInPage /> },
+      { path: "signup", element: <SignUpPage /> },
     ],
   },
 ];

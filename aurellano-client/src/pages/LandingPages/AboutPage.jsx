@@ -1,4 +1,4 @@
-import Button from "../components/Button";
+import Button from "../../components/Button";
 
 const aboutImg = "/assets/imgs/about.jpg";
 const grid1 = "/assets/imgs/grid (1).jpg";
