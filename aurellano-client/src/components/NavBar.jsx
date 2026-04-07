@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import SignOutButton from "./Button";
 
 const logo = "/assets/imgs/my_logo.png";
 
@@ -44,6 +45,10 @@ const NavBar = () => {
             </NavLink>
           ))}
         </nav>
+
+        <SignOutButton variant="custom3" to="auth/signin">
+          Sign Out
+        </SignOutButton>
       </div>
     </header>
   );

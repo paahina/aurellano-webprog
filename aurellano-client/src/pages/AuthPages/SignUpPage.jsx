@@ -10,10 +10,10 @@ const actionButtonClassName =
 const SignUpPage = () => {
   return (
     <>
-      <h1 className="text-3xl font-bold tracking-tight text-zinc-900 sm:text-4xl">
+      <h1 className="text-3xl font-bold tracking-tight text-[#0C3AA7] sm:text-4xl">
         Sign Up
       </h1>
-      <p className="mt-3 text-sm leading-6 text-zinc-600">
+      <p className="mt-3 text-sm leading-6 text-white">
         Create your account with the same monochrome layout pattern and shared
         button treatment.
       </p>
@@ -22,7 +22,7 @@ const SignUpPage = () => {
           <div>
             <label
               htmlFor="first-name"
-              className="text-sm font-medium text-zinc-700"
+              className="text-sm font-medium text-[#0C3AA7]"
             >
               First Name
             </label>
@@ -37,7 +37,7 @@ const SignUpPage = () => {
           <div>
             <label
               htmlFor="last-name"
-              className="text-sm font-medium text-zinc-700"
+              className="text-sm font-medium text-[#0C3AA7]"
             >
               Last Name
             </label>
@@ -53,7 +53,7 @@ const SignUpPage = () => {
         <div>
           <label
             htmlFor="signup-email"
-            className="text-sm font-medium text-zinc-700"
+            className="text-sm font-medium text-[#0C3AA7]"
           >
             Email
           </label>
@@ -68,7 +68,7 @@ const SignUpPage = () => {
         <div>
           <label
             htmlFor="signup-password"
-            className="text-sm font-medium text-zinc-700"
+            className="text-sm font-medium text-[#0C3AA7]"
           >
             Password
           </label>
@@ -79,13 +79,13 @@ const SignUpPage = () => {
             autoComplete="new-password"
             className={inputClasses}
           />
-          <p className="mt-2 text-xs leading-5 text-zinc-500">
+          <p className="mt-2 text-xs leading-5 text-white">
             Use a secure password with letters, numbers, and symbols.
           </p>
         </div>
         <Button
           type="submit"
-          variant="primary"
+          variant="custom2"
           className={actionButtonClassName}
         >
           Create Account
@@ -93,25 +93,25 @@ const SignUpPage = () => {
         <div className="grid gap-3 pt-2 sm:grid-cols-2">
           <Button
             type="button"
-            variant="secondary"
+            variant="custom1"
             className={actionButtonClassName}
           >
             Sign Up with Google
           </Button>
           <Button
             type="button"
-            variant="secondary"
+            variant="custom1"
             className={actionButtonClassName}
           >
             Sign Up with Apple
           </Button>
         </div>
       </form>
-      <div className="mt-8 border-t border-zinc-200 pt-6 text-sm text-zinc-600">
+      <div className="mt-8 border-t border-zinc-200 pt-6 text-sm text-white">
         Already have an account?{" "}
         <Link
           to="/auth/signin"
-          className="font-semibold text-zinc-900 transition hover:text-zinc-600"
+          className="font-semibold text-[#0C3AA7] transition hover:text-white"
         >
           Log In
         </Link>

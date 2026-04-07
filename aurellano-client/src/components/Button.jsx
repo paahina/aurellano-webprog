@@ -9,6 +9,8 @@ const variantClasses = {
     "rounded-[0.8em] bg-[#ebebeb] text-[#0C3AA7] font-[700] shadow-[0_4px_10px_rgba(0,0,0,0.15)] hover:bg-[#d9d9d9]",
   custom2:
     "rounded-[0.8em] bg-[#0C3AA7] text-white font-[700] shadow-[0_4px_10px_rgba(0,0,0,0.15)] hover:bg-[#2256D1] cursor-pointer",
+  custom3:
+    "rounded-[0.8em] shadow-[4px_4px_10px_rgba(0,0,0,0.15)] shadow-[-4px_-4px_10px_rgba(255,255,255,0.8)] hover:bg-[#e1e1e1] cursor-pointer",
 };
 
 const Button = ({
