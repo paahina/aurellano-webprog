@@ -3,11 +3,16 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 //Layouts
 import Layout from "./layouts/Layout";
 import AuthLayout from "./layouts/AuthLayout";
+import DashLayout from "./layouts/DashLayout";
 //Landing Pages
 import HomePage from "./pages/LandingPages/HomePage";
 import ArticleListPage from "./pages/LandingPages/ArticleListPage";
 import ArticlePage from "./pages/LandingPages/ArticlePage";
 import AboutPage from "./pages/LandingPages/AboutPage";
+//Dashboard Pages
+import DashboardPage from "./pages/DashboardPages/DashboardPage";
+import ReportsPage from "./pages/DashboardPages/ReportsPage";
+import UsersPage from "./pages/DashboardPages/UsersPage";
 //Authentication Pages
 import SignInPage from "./pages/AuthPages/SignInPage";
 import SignUpPage from "./pages/AuthPages/SignUpPage";
@@ -33,6 +38,16 @@ const routes = [
     children: [
       { path: "signin", element: <SignInPage /> },
       { path: "signup", element: <SignUpPage /> },
+    ],
+  },
+  {
+    path: "dashboard/",
+    element: <DashLayout />,
+    errorElement: <NotFoundPage />,
+    children: [
+      { path: "", element: <DashboardPage /> },
+      { path: "reports", element: <ReportsPage /> },
+      { path: "users", element: <UsersPage /> },
     ],
   },
 ];

@@ -47,7 +47,7 @@ const NavBar = () => {
         </nav>
 
         <SignOutButton variant="custom3" to="auth/signin">
-          Sign Out
+          Sign In
         </SignOutButton>
       </div>
     </header>
