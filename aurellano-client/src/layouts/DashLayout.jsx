@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { styled, useTheme, alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
@@ -161,6 +161,10 @@ const DashLayout = () => {
   const pageTitle = getPageTitle(location.pathname);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    document.title = pageTitle;
+  }, [pageTitle]);
+
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -176,7 +180,23 @@ const DashLayout = () => {
   return (
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      <AppBar position="fixed" open={open}>
+      <AppBar
+        position="fixed"
+        open={open}
+        sx={{
+          backgroundColor: "#2563eb",
+          color: "#fff",
+          "& .MuiIconButton-root": { color: "inherit" },
+          "& .MuiButton-outlined": {
+            borderColor: "rgba(255,255,255,0.6)",
+            color: "inherit",
+          },
+          "& .MuiButton-outlined:hover": {
+            borderColor: "rgba(255,255,255,0.9)",
+            backgroundColor: "rgba(255,255,255,0.08)",
+          },
+        }}
+      >
         <Toolbar>
           <IconButton
             color="inherit"

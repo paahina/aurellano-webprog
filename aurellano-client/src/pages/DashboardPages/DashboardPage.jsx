@@ -1,16 +1,24 @@
-import { BarChart } from "@mui/x-charts/BarChart";
-import { DataGrid } from "@mui/x-data-grid";
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
 import { Gauge } from "@mui/x-charts/Gauge";
 import Typography from "@mui/material/Typography";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
-import { PieChart } from "@mui/x-charts/PieChart";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import users from "../../assets/users.json";
+import reports from "../../assets/report.json";
+import StatCard from "../../components/Dashboard/StatCard";
+import GaugeStatCard from "../../components/Dashboard/GaugeStatCard";
+import GenericDataGrid from "../../components/Dashboard/GenericDataGrid";
+import BarChartReport from "../../components/Dashboard/BarChartReport";
+import PieChartReport from "../../components/Dashboard/PieChartReport";
+import {
+  countRevenueDays,
+  weeklyOrders,
+  weeklyRevenue,
+} from "../../utils/reportUtils";
 
-const columns = [
+const userColumns = [
   { field: "id", headerName: "ID", width: 90 },
   {
     field: "firstName",
@@ -30,6 +38,8 @@ const columns = [
     type: "number",
     width: 110,
     editable: true,
+    align: "left",
+    headerAlign: "left",
   },
   {
     field: "fullName",
@@ -41,132 +51,142 @@ const columns = [
   },
 ];
 
-const rows = [
-  { id: 1, lastName: "Snow", firstName: "Jon", age: 14 },
-  { id: 2, lastName: "Lannister", firstName: "Cersei", age: 31 },
-  { id: 3, lastName: "Lannister", firstName: "Jaime", age: 31 },
-  { id: 4, lastName: "Stark", firstName: "Arya", age: 11 },
-  { id: 5, lastName: "Targaryen", firstName: "Daenerys", age: null },
-  { id: 6, lastName: "Melisandre", firstName: null, age: 150 },
-  { id: 7, lastName: "Clifford", firstName: "Ferrara", age: 44 },
-  { id: 8, lastName: "Frances", firstName: "Rossini", age: 36 },
-  { id: 9, lastName: "Roxie", firstName: "Harvey", age: 65 },
-];
-
 function DashboardPage() {
+  const weeks = weeklyRevenue(reports);
+  const orderWeeks = weeklyOrders(reports);
+
   return (
     <>
       <Typography variant="h4" gutterBottom>
         Dashboard
       </Typography>
+
+      <Stack
+        direction={{ xs: "column", md: "row" }}
+        className="border border-gray-300 rounded-xl p-4 mb-4 items-center justify-center gap-4"
+      >
+        <StatCard title="Total Revenue" value={reports.length} />
+        <StatCard
+          title="Average Revenue"
+          value={(
+            reports.reduce((sum, item) => sum + item.revenue, 0) /
+            reports.length
+          ).toFixed(2)}
+        />
+        <Divider orientation="vertical" sx={{ borderWidth: 1 }} flexItem />
+        <StatCard
+          title="Total Orders"
+          value={reports.reduce((sum, item) => sum + item.orders, 0)}
+        />
+        <StatCard
+          title="Average Orders"
+          value={(
+            reports.reduce((sum, item) => sum + item.orders, 0) / reports.length
+          ).toFixed(2)}
+        />
+        <Divider orientation="vertical" sx={{ borderWidth: 1 }} flexItem />
+        <StatCard title="Total Users" value={users.length} />
+        <StatCard
+          title="Average Age"
+          value={(
+            users.reduce((sum, item) => sum + item.age, 0) / users.length
+          ).toFixed(2)}
+        />
+      </Stack>
+
+      <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ mb: 4 }}>
+        <Stack
+          direction={{ xs: "column", md: "column" }}
+          spacing={2}
+          sx={{ mb: 4, justifyContent: "center" }}
+          display="flex"
+        >
+          <GaugeStatCard
+            label="Revenue (high days)"
+          value={countRevenueDays(reports, { status: "high" })}
+            valueMin={0}
+            valueMax={reports.length}
+          />
+          <GaugeStatCard
+            label="Revenue (low days)"
+          value={countRevenueDays(reports, { status: "low" })}
+            valueMin={0}
+            valueMax={reports.length}
+          />
+        </Stack>
+        <BarChartReport
+          data={weeks.map((w) => Math.round(w.revenue))}
+          xLabels={weeks.map((w) => w.label)}
+          title="Weekly revenue"
+          color="#62AAF7"
+          containerClassName="bg-gray-100 rounded-xl p-4 flex-1 border border-gray-300"
+        />
+        <PieChartReport
+          data={orderWeeks.map((w, i) => ({
+            id: i,
+            value: w.orders,
+            label: w.label,
+          }))}
+          title="Weekly orders"
+          height={200}
+          containerClassName="bg-gray-100 rounded-xl p-4 flex-1 border border-gray-300 flex items-center justify-center"
+        />
+      </Stack>
       <Stack
         direction={{ xs: "column", md: "row" }}
         spacing={2}
-        sx={{ mb: 4 }}
-        display="flex"
+        sx={{ mb: 4, alignItems: "stretch" }}
       >
-        <Card>
-          <CardContent>
-            <Typography variant="h6">Total Users</Typography>
-            <Typography variant="h4">{rows.length}</Typography>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent>
-            <Typography variant="h6">Average Age</Typography>
-            <Typography variant="h4">
-              {(
-                rows.reduce((sum, row) => sum + (row.age || 0), 0) /
-                rows.filter((row) => row.age !== null).length
-              ).toFixed(1)}
-            </Typography>
-          </CardContent>
-        </Card>
-      </Stack>
-
-      <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ mb: 4 }}>
-        <Gauge width={100} height={100} value={60} />
-        <Gauge
-          width={100}
-          height={100}
-          value={30}
-          valueMin={10}
-          valueMax={60}
+        <GenericDataGrid
+          title="Users Overview"
+          rows={users}
+          columns={userColumns}
         />
-      </Stack>
-
-      <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ mb: 4 }}>
-        <BarChart
-          series={[
-            { data: [35, 44, 24, 34], label: "Series 1" },
-            { data: [51, 6, 49, 30], label: "Series 2" },
-          ]}
-          height={290}
-          xAxis={[
-            {
-              data: ["Q1", "Q2", "Q3", "Q4"],
-              scaleType: "band",
-              label: "Quarters",
-            },
-          ]}
-          title="Quarterly Sales"
-        />
-        <PieChart
-          series={[
-            {
-              data: [
-                { id: 0, value: 10, label: "series A" },
-                { id: 1, value: 15, label: "series B" },
-                { id: 2, value: 20, label: "series C" },
-              ],
-            },
-          ]}
-          width={400}
-          height={200}
-        />
-      </Stack>
-
-      <Typography variant="h5" gutterBottom>
-        Users Overview
-      </Typography>
-      <Box sx={{ height: 400, width: "100%", mb: 4 }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
-              },
-            },
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+            minHeight: { xs: 360, md: 0 },
           }}
-          pageSizeOptions={[5]}
-          checkboxSelection
-          disableRowSelectionOnClick
-        />
-      </Box>
-
-      <Typography variant="h5" gutterBottom sx={{ mt: 4 }}>
-        Location Map
-      </Typography>
-      <Box sx={{ height: 500, width: "100%" }}>
-        <MapContainer
-          center={[14.604215, 120.994314]}
-          zoom={13}
-          style={{ height: "100%", width: "100%" }}
         >
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-          <Marker position={[14.604215, 120.994314]}>
-            <Popup>
-              National University-Manila <br />
-              <p>551 F Jhocson St, Sampaloc, Manila, 1008 Metro Manila</p>
-            </Popup>
-          </Marker>
-        </MapContainer>
-      </Box>
+          <Typography variant="h5" gutterBottom>
+            Location Map
+          </Typography>
+          <Box
+            sx={{
+              flex: 1,
+              minHeight: 400,
+              border: "1px solid",
+              borderColor: "grey.300",
+              borderRadius: 2,
+              overflow: "hidden",
+              "& .leaflet-container": {
+                height: "100%",
+                width: "100%",
+              },
+            }}
+          >
+            <MapContainer
+              center={[14.604215, 120.994314]}
+              zoom={13}
+              style={{ height: "100%", width: "100%", minHeight: 400 }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Marker position={[14.604215, 120.994314]}>
+                <Popup>
+                  National University-Manila <br />
+                  <p>551 F Jhocson St, Sampaloc, Manila, 1008 Metro Manila</p>
+                </Popup>
+              </Marker>
+            </MapContainer>
+          </Box>
+        </Box>
+      </Stack>
     </>
   );
 }
