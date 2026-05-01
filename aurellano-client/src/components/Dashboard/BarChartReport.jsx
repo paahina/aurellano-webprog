@@ -1,39 +1,25 @@
-import Box from "@mui/material/Box";
 import { BarChart } from "@mui/x-charts/BarChart";
+import ReportChartPanel from "./ReportChartPanel";
 
 function BarChartReport({
-  data,
-  xLabels,
-  title = "Weekly revenue",
-  seriesLabel = "Revenue",
-  color = "#2563eb",
-  height = 290,
-  minHeight = 320,
-  containerClassName = "bg-gray-100 rounded-xl p-4 border border-gray-300",
+  title,
+  description,
+  series,
+  xAxis,
+  height = 300,
+  sx,
+  ...barChartProps
 }) {
   return (
-    <Box className={containerClassName} sx={{ minHeight }}>
+    <ReportChartPanel title={title} description={description} sx={sx}>
       <BarChart
-        series={[
-          {
-            data,
-            label: seriesLabel,
-            color,
-          },
-        ]}
+        series={series}
+        xAxis={xAxis}
         height={height}
-        xAxis={[
-          {
-            data: xLabels,
-            scaleType: "band",
-            label: "Weeks",
-          },
-        ]}
-        title={title}
+        {...barChartProps}
       />
-    </Box>
+    </ReportChartPanel>
   );
 }
 
 export default BarChartReport;
-

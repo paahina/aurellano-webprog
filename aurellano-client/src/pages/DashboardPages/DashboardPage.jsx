@@ -1,17 +1,16 @@
 import Stack from "@mui/material/Stack";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
-import { Gauge } from "@mui/x-charts/Gauge";
 import Typography from "@mui/material/Typography";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import users from "../../assets/users.json";
-import reports from "../../assets/report.json";
+import users from "../../data/users.json";
+import reports from "../../data/report.json";
 import StatCard from "../../components/Dashboard/StatCard";
-import GaugeStatCard from "../../components/Dashboard/GaugeStatCard";
 import GenericDataGrid from "../../components/Dashboard/GenericDataGrid";
 import BarChartReport from "../../components/Dashboard/BarChartReport";
 import PieChartReport from "../../components/Dashboard/PieChartReport";
+import GaugeReportPanel from "../../components/Dashboard/GaugeReportPanel";
 import {
   countRevenueDays,
   weeklyOrders,
@@ -54,6 +53,7 @@ const userColumns = [
 function DashboardPage() {
   const weeks = weeklyRevenue(reports);
   const orderWeeks = weeklyOrders(reports);
+  const userRows = users.map((u, i) => ({ id: i + 1, ...u }));
 
   return (
     <>
@@ -89,48 +89,72 @@ function DashboardPage() {
         <StatCard
           title="Average Age"
           value={(
-            users.reduce((sum, item) => sum + item.age, 0) / users.length
+            users.reduce((sum, item) => sum + (Number(item.age) || 0), 0) /
+            (users.length || 1)
           ).toFixed(2)}
         />
       </Stack>
 
-      <Stack direction={{ xs: "column", md: "row" }} spacing={2} sx={{ mb: 4 }}>
-        <Stack
-          direction={{ xs: "column", md: "column" }}
-          spacing={2}
-          sx={{ mb: 4, justifyContent: "center" }}
-          display="flex"
-        >
-          <GaugeStatCard
-            label="Revenue (high days)"
-          value={countRevenueDays(reports, { status: "high" })}
-            valueMin={0}
-            valueMax={reports.length}
+      <Stack
+        direction={{ xs: "column", md: "column" }}
+        spacing={2}
+        sx={{ mb: 4 }}
+      >
+        <Stack direction={{ xs: "column", md: "row" }} spacing={2}>
+          <BarChartReport
+            title="Weekly revenue"
+            description="Revenue aggregated by week from the current report dataset."
+            series={[
+              {
+                data: weeks.map((w) => Math.round(w.revenue)),
+                label: "Revenue",
+                color: "#0c3aa7",
+              },
+            ]}
+            xAxis={[
+              {
+                data: weeks.map((w) => w.label),
+                scaleType: "band",
+                label: "Weeks",
+              },
+            ]}
+            sx={{ flex: 1, minWidth: 0 }}
           />
-          <GaugeStatCard
-            label="Revenue (low days)"
-          value={countRevenueDays(reports, { status: "low" })}
-            valueMin={0}
-            valueMax={reports.length}
+          <PieChartReport
+            title="Weekly orders"
+            description="Order volume by week for the current reporting window."
+            data={orderWeeks.map((w, i) => ({
+              id: i,
+              value: w.orders,
+              label: w.label,
+            }))}
+            height={200}
+            sx={{ flex: 1, minWidth: 0 }}
           />
         </Stack>
-        <BarChartReport
-          data={weeks.map((w) => Math.round(w.revenue))}
-          xLabels={weeks.map((w) => w.label)}
-          title="Weekly revenue"
-          color="#62AAF7"
-          containerClassName="bg-gray-100 rounded-xl p-4 flex-1 border border-gray-300"
-        />
-        <PieChartReport
-          data={orderWeeks.map((w, i) => ({
-            id: i,
-            value: w.orders,
-            label: w.label,
-          }))}
-          title="Weekly orders"
-          height={200}
-          containerClassName="bg-gray-100 rounded-xl p-4 flex-1 border border-gray-300 flex items-center justify-center"
-        />
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          spacing={2}
+          sx={{ justifyContent: "center", flex: 1, minWidth: 0 }}
+          display="flex"
+        >
+          <GaugeReportPanel
+            title="Revenue (high days)"
+            description="Number of days where revenue cleared the high threshold for the loaded report period."
+            value={countRevenueDays(reports, { status: "high" })}
+            valueMin={0}
+            valueMax={reports.length}
+            sx={{ flex: 1 }}
+          />
+          <GaugeReportPanel
+            title="Revenue (low days)"
+            description="Number of days where revenue stayed at or below the low threshold for the loaded report period."
+            value={countRevenueDays(reports, { status: "low" })}
+            valueMin={0}
+            valueMax={reports.length}
+            sx={{ flex: 1 }}
+          />
+        </Stack>
       </Stack>
       <Stack
         direction={{ xs: "column", md: "row" }}
@@ -139,8 +163,9 @@ function DashboardPage() {
       >
         <GenericDataGrid
           title="Users Overview"
-          rows={users}
+          rows={userRows}
           columns={userColumns}
+          className=""
         />
         <Box
           sx={{

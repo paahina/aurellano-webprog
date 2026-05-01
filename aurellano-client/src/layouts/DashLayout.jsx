@@ -184,7 +184,7 @@ const DashLayout = () => {
         position="fixed"
         open={open}
         sx={{
-          backgroundColor: "#2563eb",
+          backgroundColor: "#0c3aa7",
           color: "#fff",
           "& .MuiIconButton-root": { color: "inherit" },
           "& .MuiButton-outlined": {

@@ -4,9 +4,9 @@ import Typography from "@mui/material/Typography";
 
 const defaultSx = {
   borderColor: "divider",
-  "&& .MuiDataGrid-columnHeaders, && .MuiDataGrid-columnHeader, && .MuiDataGrid-filler":
+  "&& .MuiDataGrid-columnHeaders, && .MuiDataGrid-columnHeader, && .MuiDataGrid-columnHeaders .MuiDataGrid-filler":
     {
-      backgroundColor: "#2563eb",
+      backgroundColor: "#0c3aa7",
       color: "#FFFFFF",
       borderBottom: "none",
     },
@@ -46,16 +46,22 @@ function GenericDataGrid({
       },
     },
   },
+  className,
   ...dataGridProps
 }) {
+  const showTitle = title != null && String(title).trim() !== "";
+
   return (
-    <Box>
-      <Typography variant="h5" sx={{ mb: 1 }}>
-        {title}
-      </Typography>
+    <Box className={className}>
+      {showTitle ? (
+        <Typography variant="h5" sx={{ mb: 1 }}>
+          {title}
+        </Typography>
+      ) : null}
       <DataGrid
+        autoHeight
         initialState={initialState}
-        SizeOptions={[5]}
+        pageSizeOptions={[5]}
         checkboxSelection
         disableRowSelectionOnClick
         sx={sx ? [defaultSx, sx] : defaultSx}

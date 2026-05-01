@@ -69,7 +69,7 @@ const SignInPage = () => {
         <Button
           type="submit"
           variant="custom2"
-          to="/"
+          to="/dashboard"
           className={actionButtonClassName}
         >
           Log In
