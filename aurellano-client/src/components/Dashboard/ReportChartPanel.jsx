@@ -14,7 +14,7 @@ function ReportChartPanel({
   return (
     <Box className={className} sx={sx}>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom className="text-[#0c3aa7]">
           {title}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>

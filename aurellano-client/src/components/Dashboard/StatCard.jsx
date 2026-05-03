@@ -18,7 +18,7 @@ function StatCard({
       }}
     >
       <CardContent className={contentClassName}>
-        <Typography variant="h6" className="text-gray-500">
+        <Typography variant="h6" className="text-[#0c3aa7]">
           {title}
         </Typography>
         <Typography variant="h4">{value}</Typography>

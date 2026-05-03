@@ -84,12 +84,24 @@ const ReportsPage = () => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Print Report</title>
+  <title>Reports summary — Print</title>
   ${headMarkup}
   <style>
+    :root {
+      --brand-primary: #0c3aa7;
+      --brand-accent: #62aaf7;
+      --text-primary: #111827;
+      --text-secondary: #4b5563;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --surface: #ffffff;
+      --surface-muted: #f3f4f6;
+      --row-stripe: #dceeff;
+    }
+
     @page {
       size: A4;
-      margin: 16mm;
+      margin: 14mm 16mm;
     }
 
     * {
@@ -98,56 +110,190 @@ const ReportsPage = () => {
 
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #fff;
-      color: #1f2937;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      background: var(--surface-muted);
+      color: var(--text-primary);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
 
     .report-shell {
-      padding: 28px;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 0 32px;
+      background: var(--surface);
+      min-height: 100vh;
     }
 
     .report-header {
-      margin-bottom: 24px;
-      padding-bottom: 14px;
-      border-bottom: 1px solid #d1d5db;
+      margin-bottom: 0;
+      background: linear-gradient(135deg, var(--brand-primary) 0%, #0a2f8a 100%);
+      color: #fff;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .report-header__inner {
+      padding: 28px 32px 24px;
+    }
+
+    .report-header__eyebrow {
+      margin: 0 0 8px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.85);
     }
 
     .report-header h1 {
-      margin: 0 0 6px;
-      font-size: 28px;
+      margin: 0 0 12px;
+      font-size: 26px;
       font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
     }
 
-    .report-header p {
+    .report-header__lead {
       margin: 0;
+      max-width: 52ch;
       font-size: 14px;
-      color: #6b7280;
-      line-height: 1.5;
+      line-height: 1.55;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .report-header__meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px 16px;
+      padding: 14px 32px;
+      background: rgba(0, 0, 0, 0.12);
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .report-header__meta-label {
+      font-weight: 600;
+      color: var(--brand-accent);
+    }
+
+    .report-header__accent {
+      height: 4px;
+      background: linear-gradient(90deg, var(--brand-accent) 0%, #9ec9fb 100%);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .report-content {
+      padding: 28px 32px 0;
+      border-left: 4px solid var(--brand-primary);
+      margin-left: 0;
+    }
+
+    .report-content > * {
+      margin-top: 0;
+    }
+
+    .report-content .MuiStack-root {
+      gap: 20px !important;
     }
 
     .report-content .MuiCard-root {
       box-shadow: none !important;
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--border) !important;
+      border-radius: 12px !important;
+      overflow: hidden;
       break-inside: avoid;
       page-break-inside: avoid;
+      background: var(--surface) !important;
     }
 
     .report-content .MuiCardContent-root {
-      padding: 20px;
+      padding: 20px 22px !important;
+    }
+
+    .report-content .MuiTypography-h6 {
+      color: var(--brand-primary) !important;
+    }
+
+    .report-content .bg-gray-100,
+    .report-content [class*="bg-gray-100"] {
+      background: var(--surface-muted) !important;
+      border-color: var(--border) !important;
     }
 
     .report-content svg {
       max-width: 100%;
+      height: auto;
+    }
+
+    .report-content .MuiDataGrid-root {
+      border: 1px solid var(--border) !important;
+      border-radius: 8px !important;
+      overflow: hidden;
+    }
+
+    .report-content .MuiDataGrid-columnHeaders,
+    .report-content .MuiDataGrid-columnHeader,
+    .report-content .MuiDataGrid-columnHeaders .MuiDataGrid-filler {
+      background-color: var(--brand-primary) !important;
+      color: #ffffff !important;
+      border-bottom: none !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .report-content .MuiDataGrid-columnHeaderTitle {
+      font-weight: 600 !important;
+    }
+
+    .report-content .MuiDataGrid-row {
+      background-color: var(--surface-muted) !important;
+    }
+
+    .report-content .MuiDataGrid-row:nth-of-type(even) {
+      background-color: var(--row-stripe) !important;
+    }
+
+    .report-content .MuiDataGrid-cell {
+      border-color: var(--border) !important;
+    }
+
+    @media print {
+      body {
+        background: #fff;
+      }
+
+      .report-shell {
+        max-width: none;
+        padding: 0;
+      }
+
+      .report-content {
+        padding-top: 20px;
+      }
     }
   </style>
 </head>
 <body>
   <main class="report-shell">
     <header class="report-header">
-      <h1>Reports Summary</h1>
-      <p>Analytics overview for generated reports, category breakdown, and completion performance.</p>
-      <p>Prepared on ${exportedAt}</p>
+      <div class="report-header__inner">
+        <p class="report-header__eyebrow">Dashboard · Reports</p>
+        <h1>Reports summary</h1>
+        <p class="report-header__lead">
+          Analytics overview for generated reports, category breakdown, and completion performance.
+        </p>
+      </div>
+      <div class="report-header__meta">
+        <span class="report-header__meta-label">Generated</span>
+        <span>${exportedAt}</span>
+      </div>
+      <div class="report-header__accent" aria-hidden="true"></div>
     </header>
     <section class="report-content">
       ${printContent.outerHTML}

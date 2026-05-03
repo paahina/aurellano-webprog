@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -20,10 +20,13 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import FilterList from "@mui/icons-material/FilterList";
+import Search from "@mui/icons-material/Search";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import usersSeed from "../../data/users.json?raw";
 import GenericDataGrid from "../../components/Dashboard/GenericDataGrid";
+import UsersFilterMenu from "../../components/Dashboard/UsersFilterMenu";
 
 const roles = ["admin", "editor", "viewer"];
 const genders = ["male", "female", "other"];
@@ -94,15 +97,96 @@ const loadUsers = () => {
 
 const seed = loadUsers();
 
+const userMatchesSearch = (user, rawQuery) => {
+  const q = rawQuery.trim().toLowerCase();
+  if (!q) return true;
+  const parts = [
+    user.firstName,
+    user.lastName,
+    `${user.firstName} ${user.lastName}`.trim(),
+    user.email,
+    user.username,
+  ].map((s) => String(s ?? "").toLowerCase());
+  return parts.some((s) => s.includes(q));
+};
+
+const defaultUserFilters = {
+  role: "",
+  gender: "",
+  status: "all",
+};
+
+const userMatchesFilters = (user, f) => {
+  if (f.role && String(user.role ?? "").toLowerCase() !== f.role) {
+    return false;
+  }
+  if (f.gender && String(user.gender ?? "").toLowerCase() !== f.gender) {
+    return false;
+  }
+  if (f.status === "active" && !user.isActive) {
+    return false;
+  }
+  if (f.status === "inactive" && user.isActive) {
+    return false;
+  }
+  return true;
+};
+
 const UsersPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [users, setUsers] = useState(seed.users);
+  const [searchDraft, setSearchDraft] = useState("");
+  const [appliedSearch, setAppliedSearch] = useState("");
+  const [filterMenuAnchor, setFilterMenuAnchor] = useState(null);
+  const [filterDraft, setFilterDraft] = useState(defaultUserFilters);
+  const [appliedFilters, setAppliedFilters] = useState(defaultUserFilters);
   const [modal, setModal] = useState({ open: false, id: null });
   const [form, setForm] = useState(blankForm);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+
+  const displayedUsers = useMemo(
+    () =>
+      users.filter(
+        (u) =>
+          userMatchesSearch(u, appliedSearch) &&
+          userMatchesFilters(u, appliedFilters),
+      ),
+    [users, appliedSearch, appliedFilters],
+  );
+
+  const runSearch = () => {
+    setAppliedSearch(searchDraft);
+  };
+
+  const filterMenuOpen = Boolean(filterMenuAnchor);
+
+  const hasActiveFilters =
+    Boolean(appliedFilters.role) ||
+    Boolean(appliedFilters.gender) ||
+    appliedFilters.status !== "all";
+
+  const openFilterMenu = (event) => {
+    setFilterDraft({ ...appliedFilters });
+    setFilterMenuAnchor(event.currentTarget);
+  };
+
+  const closeFilterMenu = () => {
+    setFilterMenuAnchor(null);
+  };
+
+  const commitFilterDraft = () => {
+    setAppliedFilters({ ...filterDraft });
+    closeFilterMenu();
+  };
+
+  const clearFilters = () => {
+    setFilterDraft(defaultUserFilters);
+    setAppliedFilters(defaultUserFilters);
+    closeFilterMenu();
+  };
 
   const resetForm = () => {
     setForm({ ...blankForm });
@@ -147,29 +231,47 @@ const UsersPage = () => {
       ["role", "Role"],
       ["username", "Username"],
       ["password", "Password"],
-      ["address", "Address"],
     ].forEach(([key, label]) => {
       if (!String(form[key]).trim()) {
         nextErrors[key] = `${label} is required.`;
       }
     });
 
-    if (!nextErrors.email && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) {
-      nextErrors.email = "Enter a valid email address.";
+    const ageStr = String(form.age).trim();
+    if (!nextErrors.age && ageStr && !/^\d+$/.test(ageStr)) {
+      nextErrors.age = "Age must use numbers only (no letters, spaces, or symbols).";
+    }
+
+    const contact = String(form.contactNumber).trim();
+    if (!nextErrors.contactNumber && contact && !/^\d{11}$/.test(contact)) {
+      nextErrors.contactNumber =
+        "Contact number must be exactly 11 digits (numbers only, e.g. 09171234567).";
+    }
+
+    if (!nextErrors.username && /\s/.test(form.username)) {
+      nextErrors.username = "Username cannot contain spaces. Use letters, numbers, or underscores.";
+    }
+
+    if (!nextErrors.password && form.password.trim().length < 8) {
+      nextErrors.password = "Password must be at least 8 characters long.";
+    }
+
+    if (!nextErrors.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      nextErrors.email = "Enter a valid email address (example: name@email.com).";
     }
 
     if (
       !nextErrors.email &&
       users.some((user) => user.id !== modal.id && user.email === email)
     ) {
-      nextErrors.email = "Email address already exists.";
+      nextErrors.email = "This email is already used by another user.";
     }
 
     if (
       !nextErrors.username &&
       users.some((user) => user.id !== modal.id && user.username === username)
     ) {
-      nextErrors.username = "Username already exists.";
+      nextErrors.username = "This username is already taken. Pick a different one.";
     }
 
     return nextErrors;
@@ -318,13 +420,81 @@ const UsersPage = () => {
         }}
       >
         <Typography variant="h4">Users</Typography>
-        <Button
-          variant="contained"
-          onClick={() => openModal()}
-          sx={{ width: { xs: "100%", sm: "auto" } }}
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          alignItems={{ xs: "stretch", sm: "center" }}
+          useFlexGap
+          className="w-full min-w-0 sm:w-auto sm:flex-1 sm:justify-end"
         >
-          Add User
-        </Button>
+          <TextField
+            size="small"
+            value={searchDraft}
+            onChange={(e) => setSearchDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                runSearch();
+              }
+            }}
+            placeholder="Search users… (firstName, lastName, email, or username)"
+            aria-label="Search users"
+            disabled={Boolean(seed.error)}
+            className="min-w-0 w-full max-w-full sm:flex-1 sm:max-w-md"
+          />
+          <Button
+            type="button"
+            variant="contained"
+            startIcon={<Search />}
+            disabled={Boolean(seed.error)}
+            onClick={runSearch}
+            sx={{ width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
+          >
+            Search
+          </Button>
+          <Button
+            type="button"
+            variant="outlined"
+            color={hasActiveFilters ? "primary" : "inherit"}
+            startIcon={<FilterList />}
+            disabled={Boolean(seed.error)}
+            aria-expanded={filterMenuOpen ? "true" : undefined}
+            aria-haspopup="true"
+            aria-controls={filterMenuOpen ? "users-filter-menu" : undefined}
+            id="users-filter-button"
+            title="Select filters, then click Apply filters"
+            onClick={openFilterMenu}
+            sx={{ width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
+          >
+            Filters
+          </Button>
+          <UsersFilterMenu
+            anchorEl={filterMenuAnchor}
+            open={filterMenuOpen}
+            onClose={closeFilterMenu}
+            draft={filterDraft}
+            setDraft={setFilterDraft}
+            onApply={commitFilterDraft}
+            roles={roles}
+            genders={genders}
+          />
+          <Button
+            type="button"
+            variant="outlined"
+            disabled={Boolean(seed.error) || !hasActiveFilters}
+            onClick={clearFilters}
+            sx={{ width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
+          >
+            Clear filters
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => openModal()}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
+          >
+            Add User
+          </Button>
+        </Stack>
       </Box>
 
       {seed.error ? (
@@ -341,8 +511,19 @@ const UsersPage = () => {
               minWidth: 0,
             }}
           >
+            {displayedUsers.length === 0 && users.length ? (
+              <Alert severity="info" sx={{ mb: 2 }}>
+                {appliedSearch.trim() && hasActiveFilters
+                  ? "No users match your current search and filters. Adjust them and try again."
+                  : appliedSearch.trim()
+                    ? `No users match "${appliedSearch.trim()}". Change the text and click Search, or try another name, email, or username.`
+                    : hasActiveFilters
+                      ? "No users match the selected filters. Open Filters, adjust choices, Apply filters, or click Clear filters."
+                      : "No users to display."}
+              </Alert>
+            ) : null}
             <GenericDataGrid
-              rows={users}
+              rows={displayedUsers}
               columns={columns}
               checkboxSelection={false}
               pageSizeOptions={[5, 10]}
@@ -381,7 +562,12 @@ const UsersPage = () => {
               </Stack>
 
               <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                <TextField {...fieldProps("age", "Age")} />
+                <TextField
+                  {...fieldProps("age", "Age", {
+                    placeholder: "Numbers only, e.g. 21",
+                    inputProps: { inputMode: "numeric", pattern: "[0-9]*" },
+                  })}
+                />
                 <TextField
                   {...fieldProps("gender", "Gender", { select: true })}
                 >
@@ -394,7 +580,12 @@ const UsersPage = () => {
               </Stack>
 
               <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                <TextField {...fieldProps("contactNumber", "Contact Number")} />
+                <TextField
+                  {...fieldProps("contactNumber", "Contact Number", {
+                    placeholder: "11 digits, e.g. 09171234567",
+                    inputProps: { maxLength: 11, inputMode: "numeric" },
+                  })}
+                />
                 <TextField
                   {...fieldProps("email", "Email Address", { type: "email" })}
                 />
@@ -408,11 +599,16 @@ const UsersPage = () => {
                     </MenuItem>
                   ))}
                 </TextField>
-                <TextField {...fieldProps("username", "Username")} />
+                <TextField
+                  {...fieldProps("username", "Username", {
+                    placeholder: "No spaces (e.g. juandelacruz01)",
+                  })}
+                />
               </Stack>
 
               <TextField
                 {...fieldProps("password", "Password", {
+                  placeholder: "At least 8 characters",
                   type: showPassword ? "text" : "password",
                   slotProps: {
                     input: {
@@ -436,7 +632,7 @@ const UsersPage = () => {
               />
 
               <TextField
-                {...fieldProps("address", "Address", {
+                {...fieldProps("address", "Address (optional)", {
                   multiline: true,
                   rows: 3,
                 })}
