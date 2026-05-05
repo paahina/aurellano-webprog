@@ -1,7 +1,3 @@
-/**
- * Returns YYYY-MM-DD for the Monday of the given date's week.
- * (Noon avoids timezone edge cases when parsing ISO date strings.)
- */
 export function weekStartKey(isoDateStr) {
   const d = new Date(`${isoDateStr}T12:00:00`);
   const day = d.getDay();

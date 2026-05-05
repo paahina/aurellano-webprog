@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -24,9 +24,9 @@ import FilterList from "@mui/icons-material/FilterList";
 import Search from "@mui/icons-material/Search";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import usersSeed from "../../data/users.json?raw";
 import GenericDataGrid from "../../components/Dashboard/GenericDataGrid";
 import UsersFilterMenu from "../../components/Dashboard/UsersFilterMenu";
+import { fetchUsers } from "../../services/UserService";
 
 const roles = ["admin", "editor", "viewer"];
 const genders = ["male", "female", "other"];
@@ -47,55 +47,6 @@ const blankForm = {
 
 const labelize = (value) =>
   value ? `${value.charAt(0).toUpperCase()}${value.slice(1)}` : "";
-
-const loadUsers = () => {
-  try {
-    return {
-      users: JSON.parse(usersSeed).map((user, index) => ({
-        id: Number(user.id) || index + 1,
-        firstName: String(user.firstName ?? "").trim(),
-        lastName: String(user.lastName ?? "").trim(),
-        age: String(user.age ?? "").trim(),
-        gender: genders.includes(
-          String(user.gender ?? "")
-            .trim()
-            .toLowerCase(),
-        )
-          ? String(user.gender ?? "")
-              .trim()
-              .toLowerCase()
-          : "",
-        contactNumber: String(user.contactNumber ?? "").trim(),
-        email: String(user.email ?? "")
-          .trim()
-          .toLowerCase(),
-        role: roles.includes(
-          String(user.role ?? "")
-            .trim()
-            .toLowerCase(),
-        )
-          ? String(user.role ?? "")
-              .trim()
-              .toLowerCase()
-          : "editor",
-        username: String(user.username ?? "")
-          .trim()
-          .toLowerCase(),
-        password: String(user.password ?? "").trim(),
-        address: String(user.address ?? "").trim(),
-        isActive: typeof user.isActive === "boolean" ? user.isActive : true,
-      })),
-      error: "",
-    };
-  } catch {
-    return {
-      users: [],
-      error: "Unable to read users from src/data/users.json.",
-    };
-  }
-};
-
-const seed = loadUsers();
 
 const userMatchesSearch = (user, rawQuery) => {
   const q = rawQuery.trim().toLowerCase();
@@ -136,7 +87,8 @@ const UsersPage = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const [users, setUsers] = useState(seed.users);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchDraft, setSearchDraft] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [filterMenuAnchor, setFilterMenuAnchor] = useState(null);
@@ -146,6 +98,29 @@ const UsersPage = () => {
   const [form, setForm] = useState(blankForm);
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+
+  const getUserId = (user) => user?._id ?? user?.id ?? null;
+
+  const loadUsers = async () => {
+    setLoading(true);
+    try {
+      const { data } = await fetchUsers();
+      setUsers(data?.users ?? []);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    (async () => {
+      try {
+        await loadUsers();
+      } catch (error) {
+        console.error("Error loading users:", error);
+        setLoading(false);
+      }
+    })();
+  }, []);
 
   const displayedUsers = useMemo(
     () =>
@@ -194,7 +169,7 @@ const UsersPage = () => {
   };
 
   const openModal = (user) => {
-    setModal({ open: true, id: user?.id ?? null });
+    setModal({ open: true, id: getUserId(user) });
     setForm(user ? { ...blankForm, ...user } : { ...blankForm });
     setErrors({});
   };
@@ -239,7 +214,8 @@ const UsersPage = () => {
 
     const ageStr = String(form.age).trim();
     if (!nextErrors.age && ageStr && !/^\d+$/.test(ageStr)) {
-      nextErrors.age = "Age must use numbers only (no letters, spaces, or symbols).";
+      nextErrors.age =
+        "Age must use numbers only (no letters, spaces, or symbols).";
     }
 
     const contact = String(form.contactNumber).trim();
@@ -249,7 +225,8 @@ const UsersPage = () => {
     }
 
     if (!nextErrors.username && /\s/.test(form.username)) {
-      nextErrors.username = "Username cannot contain spaces. Use letters, numbers, or underscores.";
+      nextErrors.username =
+        "Username cannot contain spaces. Use letters, numbers, or underscores.";
     }
 
     if (!nextErrors.password && form.password.trim().length < 8) {
@@ -257,21 +234,25 @@ const UsersPage = () => {
     }
 
     if (!nextErrors.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      nextErrors.email = "Enter a valid email address (example: name@email.com).";
+      nextErrors.email =
+        "Enter a valid email address (example: name@email.com).";
     }
 
     if (
       !nextErrors.email &&
-      users.some((user) => user.id !== modal.id && user.email === email)
+      users.some((user) => getUserId(user) !== modal.id && user.email === email)
     ) {
       nextErrors.email = "This email is already used by another user.";
     }
 
     if (
       !nextErrors.username &&
-      users.some((user) => user.id !== modal.id && user.username === username)
+      users.some(
+        (user) => getUserId(user) !== modal.id && user.username === username,
+      )
     ) {
-      nextErrors.username = "This username is already taken. Pick a different one.";
+      nextErrors.username =
+        "This username is already taken. Pick a different one.";
     }
 
     return nextErrors;
@@ -303,16 +284,12 @@ const UsersPage = () => {
     setUsers((prev) =>
       modal.id
         ? prev.map((user) =>
-            user.id === modal.id ? { ...user, ...nextUser } : user,
+            getUserId(user) === modal.id ? { ...user, ...nextUser } : user,
           )
         : [
             ...prev,
             {
-              id:
-                prev.reduce(
-                  (max, user) => Math.max(max, Number(user.id) || 0),
-                  0,
-                ) + 1,
+              id: Date.now(),
               ...nextUser,
             },
           ],
@@ -324,7 +301,7 @@ const UsersPage = () => {
   const toggleStatus = (id) => {
     setUsers((prev) =>
       prev.map((user) =>
-        user.id === id ? { ...user, isActive: !user.isActive } : user,
+        getUserId(user) === id ? { ...user, isActive: !user.isActive } : user,
       ),
     );
   };
@@ -341,7 +318,12 @@ const UsersPage = () => {
   });
 
   const columns = [
-    { field: "id", headerName: "ID", width: 80 },
+    {
+      field: "id",
+      headerName: "ID",
+      width: 120,
+      valueGetter: (_, row) => row?._id ?? row?.id ?? "",
+    },
     {
       field: "fullName",
       headerName: "Full Name",
@@ -398,7 +380,7 @@ const UsersPage = () => {
             size="small"
             variant="contained"
             color={row.isActive ? "warning" : "success"}
-            onClick={() => toggleStatus(row.id)}
+            onClick={() => toggleStatus(getUserId(row))}
           >
             {row.isActive ? "Disable" : "Activate"}
           </Button>
@@ -439,14 +421,14 @@ const UsersPage = () => {
             }}
             placeholder="Search users… (firstName, lastName, email, or username)"
             aria-label="Search users"
-            disabled={Boolean(seed.error)}
+            disabled={loading}
             className="min-w-0 w-full max-w-full sm:flex-1 sm:max-w-md"
           />
           <Button
             type="button"
             variant="contained"
             startIcon={<Search />}
-            disabled={Boolean(seed.error)}
+            disabled={loading}
             onClick={runSearch}
             sx={{ width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
           >
@@ -457,7 +439,7 @@ const UsersPage = () => {
             variant="outlined"
             color={hasActiveFilters ? "primary" : "inherit"}
             startIcon={<FilterList />}
-            disabled={Boolean(seed.error)}
+            disabled={loading}
             aria-expanded={filterMenuOpen ? "true" : undefined}
             aria-haspopup="true"
             aria-controls={filterMenuOpen ? "users-filter-menu" : undefined}
@@ -481,7 +463,7 @@ const UsersPage = () => {
           <Button
             type="button"
             variant="outlined"
-            disabled={Boolean(seed.error) || !hasActiveFilters}
+            disabled={loading || !hasActiveFilters}
             onClick={clearFilters}
             sx={{ width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
           >
@@ -496,12 +478,6 @@ const UsersPage = () => {
           </Button>
         </Stack>
       </Box>
-
-      {seed.error ? (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {seed.error}
-        </Alert>
-      ) : null}
 
       <Paper sx={{ p: { xs: 1.5, sm: 2 }, minWidth: 0, overflow: "hidden" }}>
         {users.length ? (
@@ -525,7 +501,9 @@ const UsersPage = () => {
             <GenericDataGrid
               rows={displayedUsers}
               columns={columns}
+              getRowId={(row) => row?._id ?? row?.id}
               checkboxSelection={false}
+              loading={loading}
               pageSizeOptions={[5, 10]}
               initialState={{
                 pagination: { paginationModel: { pageSize: 5, page: 0 } },
