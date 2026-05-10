@@ -9,7 +9,8 @@ import ArticlePage from "./pages/LandingPages/ArticlePage";
 import AboutPage from "./pages/LandingPages/AboutPage";
 import DashboardPage from "./pages/DashboardPages/DashboardPage";
 import ReportsPage from "./pages/DashboardPages/ReportsPage";
-import UsersPage from "./pages/DashboardPages/UsersPage";
+import DashArticleListPage from "./pages/DashboardPages/DashArticleListPage";
+import UsersRoute from "./components/UsersRoute";
 import SignInPage from "./pages/AuthPages/SignInPage";
 import SignUpPage from "./pages/AuthPages/SignUpPage";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -42,7 +43,8 @@ const routes = [
     children: [
       { path: "", element: <DashboardPage /> },
       { path: "reports", element: <ReportsPage /> },
-      { path: "users", element: <UsersPage /> },
+      { path: "articles", element: <DashArticleListPage /> },
+      { path: "users", element: <UsersRoute /> },
     ],
   },
 ];

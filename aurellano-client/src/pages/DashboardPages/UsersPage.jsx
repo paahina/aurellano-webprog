@@ -419,7 +419,7 @@ const UsersPage = () => {
                 runSearch();
               }
             }}
-            placeholder="Search users… (firstName, lastName, email, or username)"
+            placeholder="Search..."
             aria-label="Search users"
             disabled={loading}
             className="min-w-0 w-full max-w-full sm:flex-1 sm:max-w-md"

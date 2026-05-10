@@ -72,6 +72,12 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid credentials" });
     }
 
+    if (user.type === "viewer") {
+      return res.status(403).json({
+        message: "Viewer accounts cannot access the dashboard.",
+      });
+    }
+
     const token = jwt.sign(
       { id: user._id, email: user.email, type: user.type },
       process.env.JWT_SECRET,

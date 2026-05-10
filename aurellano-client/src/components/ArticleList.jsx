@@ -1,11 +1,22 @@
 import { Link } from "react-router-dom";
 import Button from "./Button";
 
+const EXCERPT_MAX = 150;
+
+const excerptFromArticle = (article) => {
+  const raw = String(article?.content?.[0] ?? "").trim();
+  if (raw.length <= EXCERPT_MAX) return raw;
+  return `${raw.slice(0, EXCERPT_MAX)}…`;
+};
+
 const ArticleList = ({ articles }) => {
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {articles.map((article, index) => (
-        <article key={article.name} className="rounded-3xl  bg-[#97A6C9] p-4">
+        <article
+          key={String(article._id ?? article.id ?? article.name)}
+          className="rounded-3xl  bg-[#97A6C9] p-4"
+        >
           <div className="flex aspect-4/4 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
             {article.imageUrl ? (
               <img
@@ -25,7 +36,7 @@ const ArticleList = ({ articles }) => {
           </h3>
 
           <p className="mt-3 text-sm leading-6 text-white">
-            {article.content[0].substring(0, 150)}...
+            {excerptFromArticle(article)}
           </p>
           <Link to={`/articles/${article.name}`}>
             <Button className="mt-4 align-self-end" variant="custom1">

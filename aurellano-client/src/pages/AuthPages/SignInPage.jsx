@@ -9,18 +9,64 @@ const inputClasses =
 const actionButtonClassName =
   "w-full rounded-xl py-3 text-[11px] tracking-[0.2em]";
 
+const fieldErrorClass = " border-red-500 focus:border-red-600";
+
 const SignInPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
+
+  const validate = () => {
+    const nextErrors = {};
+    const emailNorm = email.trim().toLowerCase();
+
+    if (!email.trim()) {
+      nextErrors.email = "Email is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailNorm)) {
+      nextErrors.email =
+        "Enter a valid email address (example: name@email.com).";
+    }
+
+    if (!password.trim()) {
+      nextErrors.password = "Password is required.";
+    } else if (password.trim().length < 8) {
+      nextErrors.password = "Password must be at least 8 characters long.";
+    }
+
+    return nextErrors;
+  };
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    if (errors.email) {
+      setErrors((prev) => ({ ...prev, email: "" }));
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    if (errors.password) {
+      setErrors((prev) => ({ ...prev, password: "" }));
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+    const nextErrors = validate();
+    if (Object.keys(nextErrors).length) {
+      setErrors(nextErrors);
+      return;
+    }
+    setErrors({});
 
     try {
-      const { data } = await loginUser({ email, password });
+      const { data } = await loginUser({
+        email: email.trim(),
+        password: password.trim(),
+      });
       console.log("Login successful:", data);
 
       localStorage.setItem("token", data.token);
@@ -55,7 +101,7 @@ const SignInPage = () => {
           {error}
         </p>
       ) : null}
-      <form className="mt-8 space-y-5" onSubmit={handleLogin}>
+      <form className="mt-8 space-y-5" onSubmit={handleLogin} noValidate>
         <div>
           <label
             htmlFor="signin-email"
@@ -69,12 +115,22 @@ const SignInPage = () => {
             type="email"
             placeholder="Enter your email"
             autoComplete="email"
-            className={inputClasses}
+            className={`${inputClasses}${errors.email ? fieldErrorClass : ""}`}
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={handleEmailChange}
             autoFocus
-            required
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? "signin-email-error" : undefined}
           />
+          {errors.email ? (
+            <p
+              id="signin-email-error"
+              className="mt-1 text-xs text-red-600"
+              role="alert"
+            >
+              {errors.email}
+            </p>
+          ) : null}
         </div>
         <div>
           <label
@@ -89,14 +145,27 @@ const SignInPage = () => {
             type="password"
             placeholder="Enter your password"
             autoComplete="current-password"
-            className={inputClasses}
+            className={`${inputClasses}${errors.password ? fieldErrorClass : ""}`}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            onChange={handlePasswordChange}
+            aria-invalid={Boolean(errors.password)}
+            aria-describedby={
+              errors.password ? "signin-password-error" : "signin-password-hint"
+            }
           />
-          <p className="mt-2 text-xs leading-5 text-white">
-            It must be a combination of minimum 8 letters, numbers, and symbols.
-          </p>
+          {errors.password ? (
+            <p
+              id="signin-password-error"
+              className="mt-1 text-xs text-red-600"
+              role="alert"
+            >
+              {errors.password}
+            </p>
+          ) : (
+            <p id="signin-password-hint" className="mt-2 text-xs leading-5 text-white">
+              It must be a combination of minimum 8 letters, numbers, and symbols.
+            </p>
+          )}
         </div>
         <div className="flex items-center justify-between gap-4 text-sm">
           <label className="flex items-center gap-2 text-white">

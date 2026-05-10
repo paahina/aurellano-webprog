@@ -1,8 +1,49 @@
+import { useEffect, useState } from "react";
 import Button from "../../components/Button.jsx";
 import ArticleList from "../../components/ArticleList.jsx";
-import articles from "../../data/article-content.js";
+import { fetchArticles, mapArticleFromApi } from "../../services/ArticleService";
 
 const ArticleListPage = () => {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadArticles = async () => {
+      setLoading(true);
+      setLoadError("");
+      try {
+        const { data } = await fetchArticles();
+        const list = data?.articles ?? [];
+        const mapped = list.map(mapArticleFromApi).filter((a) => a.isActive);
+        if (!cancelled) {
+          setArticles(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to load articles:", err);
+        if (!cancelled) {
+          setLoadError(
+            err.response?.data?.message ||
+              err.message ||
+              "Failed to load articles.",
+          );
+          setArticles([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadArticles();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <div className="flex w-full flex-col gap-6">
       <section className=" px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
@@ -36,7 +77,24 @@ const ArticleListPage = () => {
             Article card grid
           </h2>
         </div>
-        <ArticleList articles={articles} />
+
+        {loadError ? (
+          <p className="text-sm leading-7 text-red-200">{loadError}</p>
+        ) : null}
+
+        {!loadError && loading ? (
+          <p className="text-sm leading-7 text-[#97A6C9]">Loading articles…</p>
+        ) : null}
+
+        {!loadError && !loading && articles.length === 0 ? (
+          <p className="text-sm leading-7 text-[#97A6C9]">
+            No articles to show yet. Check back soon.
+          </p>
+        ) : null}
+
+        {!loadError && !loading && articles.length > 0 ? (
+          <ArticleList articles={articles} />
+        ) : null}
       </section>
     </div>
   );
