@@ -23,7 +23,7 @@ const routes = [
     children: [
       { path: "/", element: <HomePage /> },
       { path: "/about", element: <AboutPage /> },
-      { path: "/articleS", element: <ArticleListPage /> },
+      { path: "/articles", element: <ArticleListPage /> },
       { path: "/articles/:name", element: <ArticlePage /> },
     ],
   },

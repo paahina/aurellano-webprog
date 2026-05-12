@@ -11,13 +11,13 @@ const excerptFromArticle = (article) => {
 
 const ArticleList = ({ articles }) => {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid w-full min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
       {articles.map((article, index) => (
         <article
           key={String(article._id ?? article.id ?? article.name)}
-          className="rounded-3xl  bg-[#97A6C9] p-4"
+          className="flex min-h-0 min-w-0 flex-col rounded-3xl bg-[#97A6C9] p-4"
         >
-          <div className="flex aspect-4/4 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
+          <div className="flex aspect-square min-h-0 w-full items-center justify-center overflow-hidden rounded-[1.25rem] bg-zinc-200">
             {article.imageUrl ? (
               <img
                 src={article.imageUrl}
@@ -31,15 +31,18 @@ const ArticleList = ({ articles }) => {
           <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.24em] text-white">
             Article {String(index + 1).padStart(2, "0")}
           </p>
-          <h3 className="mt-3 text-sm leading-6 text-[#0C3AA7] font-semibold">
+          <h3 className="mt-3 wrap-break-word text-sm font-semibold leading-6 text-[#0C3AA7]">
             {article.title}
           </h3>
 
-          <p className="mt-3 text-sm leading-6 text-white">
+          <p className="mt-3 flex-1 text-pretty text-sm leading-6 text-white">
             {excerptFromArticle(article)}
           </p>
-          <Link to={`/articles/${article.name}`}>
-            <Button className="mt-4 align-self-end" variant="custom1">
+          <Link
+            to={`/articles/${article.name}`}
+            className="mt-4 block w-full min-w-0 sm:inline-block sm:w-auto"
+          >
+            <Button className="w-full justify-center sm:w-auto" variant="custom1">
               Read More
             </Button>
           </Link>
