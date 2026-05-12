@@ -8,23 +8,23 @@ function ArticlePage() {
 
   if (!article) {
     return (
-      <div className="flex w-full flex-col gap-6">
+      <div className="flex w-full min-w-0 flex-col gap-6">
         <section className="px-4 py-10 sm:px-6 sm:py-12 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center">
+          <div className="mx-auto w-full max-w-3xl min-w-0 px-1 text-center sm:px-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#0C3AA7]">
               Error 404
             </p>
 
-            <h1 className="mt-2 text-3xl font-bold text-zinc-900 sm:text-4xl">
+            <h1 className="mt-2 text-balance text-3xl font-bold text-zinc-900 sm:text-4xl">
               Article Not Found
             </h1>
 
-            <p className="mt-4 text-zinc-600">
+            <p className="mt-4 text-pretty text-sm leading-7 text-zinc-600 sm:text-base">
               The article you are looking for does not exist, may have been
               removed, or the link you followed is incorrect.
             </p>
 
-            <div className="mt-6 flex justify-center gap-4">
+            <div className="mt-6 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-4">
               <Button to="/articles" variant="custom1">
                 Back to Articles
               </Button>
@@ -40,9 +40,9 @@ function ArticlePage() {
   }
 
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="flex w-full min-w-0 flex-col gap-6">
       <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="max-w-3xl">
+        <div className="mx-auto w-full max-w-3xl min-w-0">
           <div className="mb-4">
             <Button to="/articles" variant="custom2">
               ← Back to Articles
@@ -51,10 +51,10 @@ function ArticlePage() {
           <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
             Article
           </p>
-          <h1 className="text-3xl font-bold leading-tight text-[#0C3AA7] sm:text-4xl">
+          <h1 className="wrap-break-word text-balance text-3xl font-bold leading-tight text-[#0C3AA7] sm:text-4xl">
             {article.title}
           </h1>
-          <p className="mt-2 text-sm text-zinc-500">
+          <p className="mt-2 wrap-break-word text-sm text-zinc-500">
             {article.name
               .split("-")
               .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
@@ -64,24 +64,24 @@ function ArticlePage() {
       </section>
 
       <section className="bg-[#0C3AA7] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="mx-auto max-w-3xl p-4">
-          <div className="flex aspect-4/3 items-center justify-center rounded-[1.25rem] bg-zinc-200 overflow-hidden">
+        <div className="mx-auto w-full max-w-3xl min-w-0 px-1 py-2 sm:p-4 sm:px-4">
+          <div className="flex aspect-4/3 max-h-[min(360px,55vh)] w-full items-center justify-center overflow-hidden rounded-[1.25rem] bg-zinc-200 sm:max-h-none sm:aspect-4/3">
             {article.imageUrl ? (
               <img
                 src={article.imageUrl}
                 alt={article.title}
-                className="object-contain w-full h-full scale-100"
+                className="h-full w-full max-h-full object-contain"
               />
             ) : (
               <div className="h-12 w-12 border-2 border-zinc-300 bg-zinc-100" />
             )}
           </div>
 
-          <div className="prose prose-sm max-w-none space-y-4 text-zinc-700 mt-5">
+          <div className="prose prose-sm mt-5 max-w-none space-y-4 text-zinc-700">
             {article.content.map((paragraph, index) => (
               <p
                 key={index}
-                className="text-base leading-7 text-white whitespace-pre-wrap"
+                className="wrap-break-word text-base leading-7 whitespace-pre-wrap text-white"
               >
                 {paragraph}
               </p>

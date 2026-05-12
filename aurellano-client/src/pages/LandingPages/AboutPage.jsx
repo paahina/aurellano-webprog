@@ -8,38 +8,40 @@ const grid4 = "/assets/imgs/grid (4).jpg";
 
 const AboutPage = () => {
   return (
-    <div className="flex w-full flex-col gap-6">
+    <div className="flex w-full min-w-0 flex-col gap-6">
       <section className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
-          <div className="rounded-3xl overflow-hidden shadow-[0_4px_8px_rgba(0,0,0,0.85)] h-100">
-            <img
-              src={aboutImg}
-              alt="About"
-              className="object-cover w-full h-full"
-            />
+        <div className="mx-auto grid w-full max-w-7xl min-w-0 gap-8 lg:grid-cols-2 lg:items-center">
+          <div className="order-2 min-h-0 min-w-0 lg:order-1">
+            <div className="mx-auto aspect-4/3 w-full max-h-[min(420px,70vh)] overflow-hidden rounded-3xl shadow-[0_4px_8px_rgba(0,0,0,0.85)] sm:aspect-video sm:max-h-none lg:mx-0">
+              <img
+                src={aboutImg}
+                alt="About"
+                className="h-full w-full object-cover"
+              />
+            </div>
           </div>
 
-          <div>
+          <div className="order-1 min-w-0 lg:order-2">
             <p className="mb-3 text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
               About Section
             </p>
 
-            <h1 className="max-w-xl text-3xl font-bold leading-tight text-[#0C3AA7] sm:text-4xl">
+            <h1 className="max-w-xl text-balance text-3xl font-bold leading-tight text-[#0C3AA7] sm:text-4xl">
               A profile wireframe focused on layout, spacing, and content
               grouping
             </h1>
 
-            <p className="mt-4 max-w-lg text-sm leading-7 text-zinc-600 sm:text-base">
+            <p className="mt-4 max-w-lg text-pretty text-sm leading-7 text-zinc-600 sm:text-base">
               This page follows the same low-fidelity system as the homepage
               with a simple hero, overview blocks, and supporting sections for
               profile details.
             </p>
 
-            <div className="mt-6 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Button to="/" variant="custom1">
                 Back Home
               </Button>
-              <Button to="/article" variant="custom2">
+              <Button to="/articles" variant="custom2">
                 Open Articles
               </Button>
             </div>
@@ -48,16 +50,16 @@ const AboutPage = () => {
       </section>
 
       <section className="bg-[#0C3AA7] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="mb-6">
+        <div className="mx-auto mb-6 w-full max-w-7xl min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-[#97A6C9]">
             Profile Overview
           </p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">
+          <h2 className="mt-2 text-balance text-2xl font-semibold text-white sm:text-3xl">
             Quick summary blocks
           </h2>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mx-auto grid w-full max-w-7xl min-w-0 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="rounded-3xl bg-[#97A6C9] p-5">
             <p className="text-2xl font-bold text-white">12</p>
             <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#0C3AA7]">
@@ -88,14 +90,14 @@ const AboutPage = () => {
         </div>
       </section>
 
-      <section className="shadow-[0_0_10px_rgba(0,0,0,0.4)] bg-[#ebebeb px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <div>
+      <section className="bg-[#ebebeb] px-4 py-6 shadow-[0_0_10px_rgba(0,0,0,0.4)] sm:px-6 sm:py-8 lg:px-8">
+        <div className="mx-auto grid w-full max-w-7xl min-w-0 grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
+          <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-zinc-500">
               Section Flow
             </p>
 
-            <h2 className="mt-2 text-2xl font-semibold text-zinc-900">
+            <h2 className="mt-2 text-balance text-2xl font-semibold text-zinc-900 sm:text-3xl">
               Stacked content wireframe
             </h2>
 
@@ -127,7 +129,7 @@ const AboutPage = () => {
             </div>
           </div>
 
-          <div className="rounded-3xl border-2 border-[#0C3AA7] bg-[#97A6C9] p-5">
+          <div className="min-w-0 rounded-3xl border-2 border-[#0C3AA7] bg-[#97A6C9] p-4 sm:p-5">
             <p className="text-[14px] font-bold uppercase tracking-[0.28em] text-white">
               Visual Grid
             </p>
