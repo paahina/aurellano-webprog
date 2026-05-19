@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   Paper,
   Stack,
@@ -15,13 +16,23 @@ import {
 } from "@mui/material";
 import Search from "@mui/icons-material/Search";
 import FilterList from "@mui/icons-material/FilterList";
-import { fetchArticles, mapArticleFromApi } from "../../services/ArticleService";
+import {
+  buildArticlePayload,
+  createArticle,
+  deleteArticle,
+  fetchArticles,
+  getArticleErrorMessage,
+  mapArticleFromApi,
+  updateArticle,
+} from "../../services/ArticleService";
 import GenericDataGrid from "../../components/Dashboard/GenericDataGrid";
 import ArticlesFilterMenu from "../../components/Dashboard/ArticlesFilterMenu";
 
 const defaultArticleFilters = {
   status: "all",
 };
+
+const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const truncate = (text, max) => {
   const s = String(text ?? "").trim();
@@ -36,6 +47,7 @@ const blankForm = {
   title: "",
   imageUrl: "",
   body: "",
+  isActive: true,
 };
 
 const articleMatchesSearch = (article, rawQuery) => {
@@ -61,6 +73,8 @@ const DashArticleListPage = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
+  const [actionError, setActionError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [searchDraft, setSearchDraft] = useState("");
   const [appliedSearch, setAppliedSearch] = useState("");
   const [filterMenuAnchor, setFilterMenuAnchor] = useState(null);
@@ -68,10 +82,16 @@ const DashArticleListPage = () => {
   const [appliedFilters, setAppliedFilters] = useState(defaultArticleFilters);
   const [modal, setModal] = useState({ open: false, id: null });
   const [form, setForm] = useState(blankForm);
+  const [errors, setErrors] = useState({});
+  const [deleteTarget, setDeleteTarget] = useState({
+    open: false,
+    id: null,
+    title: "",
+  });
 
   const filterMenuOpen = Boolean(filterMenuAnchor);
-
   const hasActiveFilters = appliedFilters.status !== "all";
+  const busy = loading || submitting;
 
   const displayedArticles = useMemo(
     () =>
@@ -92,11 +112,7 @@ const DashArticleListPage = () => {
       setArticles(list.map(mapArticleFromApi));
     } catch (err) {
       console.error("Failed to load articles:", err);
-      setLoadError(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to load articles.",
-      );
+      setLoadError(getArticleErrorMessage(err) || "Failed to load articles.");
       setArticles([]);
     } finally {
       setLoading(false);
@@ -131,59 +147,183 @@ const DashArticleListPage = () => {
     closeFilterMenu();
   };
 
+  const resetForm = () => {
+    setForm({ ...blankForm });
+    setErrors({});
+  };
+
   const openModal = (article) => {
-    setModal({ open: true, id: getArticleId(article) });
-    setForm({
-      name: article.name,
-      title: article.title,
-      imageUrl: article.imageUrl,
-      body: (article.content ?? []).join("\n\n"),
-    });
+    setActionError("");
+    setModal({ open: true, id: article ? getArticleId(article) : null });
+    if (article) {
+      setForm({
+        name: article.name ?? "",
+        title: article.title ?? "",
+        imageUrl: article.imageUrl ?? "",
+        body: (article.content ?? []).join("\n\n"),
+        isActive: article.isActive ?? true,
+      });
+    } else {
+      resetForm();
+    }
+    setErrors({});
   };
 
   const closeModal = () => {
     setModal({ open: false, id: null });
-    setForm(blankForm);
+    resetForm();
+    setActionError("");
+  };
+
+  const openDeleteDialog = (article) => {
+    setActionError("");
+    setDeleteTarget({
+      open: true,
+      id: getArticleId(article),
+      title: article.title ?? article.name ?? "this article",
+    });
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteTarget({ open: false, id: null, title: "" });
   };
 
   const handleFormChange = ({ target: { name, value } }) => {
     setForm((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
-  const handleSubmit = (event) => {
+  const validate = () => {
+    const nextErrors = {};
+    const name = form.name.trim().toLowerCase();
+    const title = form.title.trim();
+    const imageUrl = form.imageUrl.trim();
+    const body = form.body.trim();
+
+    if (!name) {
+      nextErrors.name = "Slug is required.";
+    } else if (!SLUG_PATTERN.test(name)) {
+      nextErrors.name =
+        "Slug must be lowercase letters, numbers, and hyphens only (e.g. react-intro).";
+    } else if (
+      articles.some(
+        (a) =>
+          String(getArticleId(a)) !== String(modal.id) &&
+          String(a.name ?? "").toLowerCase() === name,
+      )
+    ) {
+      nextErrors.name = "This slug is already used by another article.";
+    }
+
+    if (!title) nextErrors.title = "Title is required.";
+    if (!imageUrl) nextErrors.imageUrl = "Image path is required.";
+    if (!body) nextErrors.body = "Body is required.";
+
+    return nextErrors;
+  };
+
+  const fieldProps = (name, label, extra = {}) => {
+    const { helperText: extraHelper, ...rest } = extra;
+    return {
+      name,
+      label,
+      value: form[name],
+      onChange: handleFormChange,
+      error: Boolean(errors[name]),
+      helperText: errors[name] || extraHelper || "",
+      fullWidth: true,
+      required: true,
+      disabled: submitting,
+      ...rest,
+    };
+  };
+
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const paragraphs = form.body
-      .split(/\n\n+/)
-      .map((p) => p.trim())
-      .filter(Boolean);
-    const content = paragraphs.length ? paragraphs : [""];
-    const description = String(content[0] ?? "").trim();
+    setActionError("");
+    const nextErrors = validate();
+    if (Object.keys(nextErrors).length) {
+      setErrors(nextErrors);
+      return;
+    }
 
-    setArticles((prev) =>
-      prev.map((a) =>
-        String(getArticleId(a)) === String(modal.id)
-          ? {
-              ...a,
-              name: form.name.trim(),
-              title: form.title.trim(),
-              imageUrl: form.imageUrl.trim(),
-              content,
-              description,
-            }
-          : a,
-      ),
-    );
-    closeModal();
+    const payload = buildArticlePayload(form);
+    setSubmitting(true);
+    try {
+      if (modal.id) {
+        const { data } = await updateArticle(modal.id, payload);
+        const mapped = mapArticleFromApi(data);
+        setArticles((prev) =>
+          prev.map((a) =>
+            String(getArticleId(a)) === String(modal.id) ? mapped : a,
+          ),
+        );
+      } else {
+        const { data } = await createArticle(payload);
+        const mapped = mapArticleFromApi(data);
+        setArticles((prev) => [...prev, mapped]);
+      }
+      closeModal();
+    } catch (err) {
+      console.error("Failed to save article:", err);
+      const message = getArticleErrorMessage(err);
+      setActionError(message);
+      if (/name|slug|duplicate/i.test(message)) {
+        setErrors((prev) => ({
+          ...prev,
+          name: message.includes("name") ? message : prev.name,
+        }));
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const toggleStatus = (id) => {
-    setArticles((prev) =>
-      prev.map((a) =>
-        String(getArticleId(a)) === String(id)
-          ? { ...a, isActive: !a.isActive }
-          : a,
-      ),
-    );
+  const toggleStatus = async (id) => {
+    const article = articles.find((a) => String(getArticleId(a)) === String(id));
+    if (!article) return;
+
+    setActionError("");
+    setSubmitting(true);
+    try {
+      const { data } = await updateArticle(id, {
+        isActive: !article.isActive,
+      });
+      const mapped = mapArticleFromApi(data);
+      setArticles((prev) =>
+        prev.map((a) => (String(getArticleId(a)) === String(id) ? mapped : a)),
+      );
+    } catch (err) {
+      console.error("Failed to update article status:", err);
+      setActionError(getArticleErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget.id) return;
+
+    setActionError("");
+    setSubmitting(true);
+    try {
+      await deleteArticle(deleteTarget.id);
+      setArticles((prev) =>
+        prev.filter((a) => String(getArticleId(a)) !== String(deleteTarget.id)),
+      );
+      closeDeleteDialog();
+    } catch (err) {
+      console.error("Failed to delete article:", err);
+      setActionError(getArticleErrorMessage(err));
+      if (err.response?.status === 404) {
+        await loadArticles();
+        closeDeleteDialog();
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const columns = [
@@ -251,21 +391,36 @@ const DashArticleListPage = () => {
     {
       field: "actions",
       headerName: "Actions",
-      minWidth: 220,
+      minWidth: 300,
       sortable: false,
       filterable: false,
       renderCell: ({ row }) => (
-        <Stack direction="row" spacing={1} sx={{ py: 0.5 }}>
-          <Button size="small" variant="outlined" onClick={() => openModal(row)}>
+        <Stack direction="row" spacing={1} sx={{ py: 0.5, flexWrap: "wrap" }}>
+          <Button
+            size="small"
+            variant="outlined"
+            disabled={busy}
+            onClick={() => openModal(row)}
+          >
             Edit
           </Button>
           <Button
             size="small"
             variant="contained"
             color={row.isActive ? "warning" : "success"}
+            disabled={busy}
             onClick={() => toggleStatus(getArticleId(row))}
           >
             {row.isActive ? "Disable" : "Activate"}
+          </Button>
+          <Button
+            size="small"
+            variant="outlined"
+            color="error"
+            disabled={busy}
+            onClick={() => openDeleteDialog(row)}
+          >
+            Delete
           </Button>
         </Stack>
       ),
@@ -304,14 +459,14 @@ const DashArticleListPage = () => {
             }}
             placeholder="Search..."
             aria-label="Search articles"
-            disabled={loading}
+            disabled={busy}
             className="min-w-0 w-full max-w-full sm:flex-1 sm:max-w-md"
           />
           <Button
             type="button"
             variant="contained"
             startIcon={<Search />}
-            disabled={loading}
+            disabled={busy}
             onClick={runSearch}
             sx={{ width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
           >
@@ -322,7 +477,7 @@ const DashArticleListPage = () => {
             variant="outlined"
             color={hasActiveFilters ? "primary" : "inherit"}
             startIcon={<FilterList />}
-            disabled={loading}
+            disabled={busy}
             aria-expanded={filterMenuOpen ? "true" : undefined}
             aria-haspopup="true"
             aria-controls={filterMenuOpen ? "articles-filter-menu" : undefined}
@@ -344,11 +499,20 @@ const DashArticleListPage = () => {
           <Button
             type="button"
             variant="outlined"
-            disabled={loading || !hasActiveFilters}
+            disabled={busy || !hasActiveFilters}
             onClick={clearFilters}
             sx={{ width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
           >
             Clear filters
+          </Button>
+          <Button
+            type="button"
+            variant="contained"
+            disabled={busy}
+            onClick={() => openModal()}
+            sx={{ width: { xs: "100%", sm: "auto" }, whiteSpace: "nowrap" }}
+          >
+            Add Article
           </Button>
         </Stack>
       </Box>
@@ -357,6 +521,12 @@ const DashArticleListPage = () => {
         {loadError ? (
           <Alert severity="error" sx={{ mb: 2 }}>
             {loadError}
+          </Alert>
+        ) : null}
+
+        {actionError && !modal.open && !deleteTarget.open ? (
+          <Alert severity="error" sx={{ mb: 2 }} onClose={() => setActionError("")}>
+            {actionError}
           </Alert>
         ) : null}
 
@@ -395,72 +565,99 @@ const DashArticleListPage = () => {
 
         {!loadError && !loading && articles.length === 0 ? (
           <Alert severity="info">
-            No articles found. Add documents to the articles collection (e.g.
-            via API or MongoDB) to see them here.
+            No articles found. Use Add Article to create your first article.
           </Alert>
         ) : null}
       </Paper>
 
       <Dialog
         open={modal.open}
-        onClose={closeModal}
+        onClose={submitting ? undefined : closeModal}
         fullWidth
         maxWidth="md"
       >
         <Box component="form" onSubmit={handleSubmit}>
-          <DialogTitle>Edit Article</DialogTitle>
+          <DialogTitle>{modal.id ? "Edit Article" : "Add Article"}</DialogTitle>
           <DialogContent dividers sx={{ px: { xs: 2, sm: 3 }, py: 2 }}>
             <Stack spacing={2} sx={{ pt: 1 }}>
-              <Typography variant="body2" color="text.secondary">
-                Article ID: {modal.id ? String(modal.id) : ""}
-              </Typography>
+              {actionError ? (
+                <Alert severity="error">{actionError}</Alert>
+              ) : null}
+              {modal.id ? (
+                <Typography variant="body2" color="text.secondary">
+                  Article ID: {String(modal.id)}
+                </Typography>
+              ) : null}
               <TextField
-                name="name"
-                label="Slug (URL name)"
-                value={form.name}
-                onChange={handleFormChange}
-                fullWidth
-                required
-                placeholder="e.g. react-introduction-frontend"
+                {...fieldProps("name", "Slug (URL name)", {
+                  placeholder: "e.g. react-introduction-frontend",
+                  helperText:
+                    errors.name ||
+                    "Lowercase letters, numbers, and hyphens only.",
+                })}
+              />
+              <TextField {...fieldProps("title", "Title")} />
+              <TextField
+                {...fieldProps("imageUrl", "Image path", {
+                  placeholder: "/assets/imgs/card (1).jpg",
+                  helperText:
+                    errors.imageUrl ||
+                    "Public path to a local image under public/ (no file upload).",
+                })}
               />
               <TextField
-                name="title"
-                label="Title"
-                value={form.title}
-                onChange={handleFormChange}
-                fullWidth
-                required
-              />
-              <TextField
-                name="imageUrl"
-                label="Image path"
-                value={form.imageUrl}
-                onChange={handleFormChange}
-                fullWidth
-                required
-                placeholder="/assets/imgs/card (1).jpg"
-                helperText="Public path to a local image under public/ (no file upload)."
-              />
-              <TextField
-                name="body"
-                label="Body"
-                value={form.body}
-                onChange={handleFormChange}
-                fullWidth
-                required
-                multiline
-                minRows={6}
-                placeholder="Paragraphs separated by a blank line"
+                {...fieldProps("body", "Body", {
+                  multiline: true,
+                  minRows: 6,
+                  placeholder: "Paragraphs separated by a blank line",
+                })}
               />
             </Stack>
           </DialogContent>
           <DialogActions sx={{ px: 3, py: 2 }}>
-            <Button onClick={closeModal}>Cancel</Button>
-            <Button type="submit" variant="contained">
-              Update Article
+            <Button onClick={closeModal} disabled={submitting}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" disabled={submitting}>
+              {submitting
+                ? "Saving…"
+                : modal.id
+                  ? "Update Article"
+                  : "Create Article"}
             </Button>
           </DialogActions>
         </Box>
+      </Dialog>
+
+      <Dialog
+        open={deleteTarget.open}
+        onClose={submitting ? undefined : closeDeleteDialog}
+      >
+        <DialogTitle>Delete article</DialogTitle>
+        <DialogContent>
+          {actionError ? (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {actionError}
+            </Alert>
+          ) : null}
+          <DialogContentText>
+            Delete article <strong>{deleteTarget.title}</strong>? This cannot be
+            undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button onClick={closeDeleteDialog} disabled={submitting}>
+            Cancel
+          </Button>
+          <Button
+            color="error"
+            variant="contained"
+            disabled={submitting}
+            onClick={confirmDelete}
+          >
+            {submitting ? "Deleting…" : "Delete"}
+          </Button>
+        </DialogActions>
       </Dialog>
     </Box>
   );
